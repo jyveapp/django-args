@@ -1,0 +1,7 @@
+_extensions:
+- jinja2_time.TimeExtension
+_template: git@github.com:jyveapp/public-django-app-template.git
+_version: 86231a67b481de2cb7db0cd08fe60fbbffa04e38
+module_name: djarg
+repo_name: django-args
+short_description: Django wrappers for python-args functions.
