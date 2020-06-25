@@ -14,7 +14,7 @@ packages = [
 ]
 version = "0.0.0"
 description = "Django wrappers for python-args functions."
-authors = ["Jyve Engineering"]
+authors = ["Wes Kendall"]
 classifiers = [
   "Intended Audience :: Developers",
   "Operating System :: OS Independent",
@@ -34,11 +34,14 @@ documentation = "https://django-args.readthedocs.io"
 [tool.poetry.dependencies]
 python = ">=3.6,<4"
 django = ">=2"
+django-formtools = "^2.2"
+python-args = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 black = "=19.10b0"
 boto3 = "=1.9.243"
 dj-database-url = "^0.5.0"
+django-dynamic-fixture = "^3.0.2"
 flake8 = "=3.7.9"
 flake8-bugbear = "=19.8.0"
 flake8-comprehensions = "=2.2.0"
@@ -48,7 +51,7 @@ flake8-mutable = "=1.2.0"
 packaging = "19.2"
 pip = "*"
 pre-commit = "1.18.3"
-psycopg2 = "^2.8.4"
+psycopg2-binary = "^2.8.4"
 pytest = "=5.4.1"
 pytest-cov = "=2.10.0"
 pytest-django = "^3.8.0"
