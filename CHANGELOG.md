@@ -1,5 +1,13 @@
 # Changelog
-## 1.0.1 (2020-06-28)
+## 1.1.0 (2020-06-29)
+### Feature
+  - Add a ``select_for_update`` option to ``djarg.qset`` [Wes Kendall, ab18034]
+
+    The ``select_for_update`` option for ``djarg.qset`` can be used to dynmaically
+    apply ``select_for_update`` on the queryset whenever one is not running in
+    a partial ``python-args`` mode (such as validation-only)
+
+## 1.0.1 (2020-06-29)
 ### Trivial
   - Added more information to the README. [Wes Kendall, c277f62]
 
