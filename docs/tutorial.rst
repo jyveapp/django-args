@@ -647,6 +647,27 @@ the `djarg.qset` utility.
   can also provide a ``qset`` keyword argument as a queryset to use
   when constructing the final queryset.
 
+Locking objects with ``djarg.qset``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The `djarg.qset` also comes with a ``select_for_update`` parameter to
+dynamically perform locking with ``select_for_update`` if we aren't
+running in a partial python-args context (i.e. only running validators).
+
+The ``select_for_update`` argument can be supplied in three ways:
+
+1. ``djarg.qset(select_for_update=True)``: Use ``select_for_update`` with the
+   default parameters.
+2. ``djarg.qset(select_for_update=['relations']])``: Use ``select_for_update``
+   with the ``of`` argument set to the list of relations.
+3. ``djarg.qset(select_for_update={'skip_locked': True})``: Pass in keyword
+   arguments directly to ``select_for_update``.
+
+Again, the key advantage of using the ``select_for_update`` argument in
+``djarg.qset`` is that it will only apply the ``select_for_update`` when
+not running in partial ``python-args`` mode. This ensures objects won't be
+locked when only running validators, for example.
+
 Using ``djarg.views.SuccessMessageMixin``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
