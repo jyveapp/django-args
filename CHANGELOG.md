@@ -1,5 +1,9 @@
 # Changelog
-## 1.0.0 (2020-06-24)
+## 1.0.1 (2020-06-28)
+### Trivial
+  - Added more information to the README. [Wes Kendall, c277f62]
+
+## 1.0.0 (2020-06-25)
 ### Api-Break
   - Initial release of django-args [Wes Kendall, 625004d]
 
