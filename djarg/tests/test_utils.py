@@ -8,6 +8,25 @@ import pytest
 import djarg.utils
 
 
+@pytest.mark.django_db
+def test_lazy_load_qset():
+    """
+    Verifies the qset utility can be given a args.Lazy qset argument
+    """
+
+    def _get_qset(username):
+        return auth_models.User.objects.filter(username=username)
+
+    @arg.defaults(users=djarg.qset('users', qset=arg.func(_get_qset)))
+    def get_user(users):
+        return users.get()
+
+    user1 = ddf.G(auth_models.User)
+    user2 = ddf.G(auth_models.User)
+
+    assert get_user(users=[user1, user2], username=user1.username) == user1
+
+
 def test_attach_select_for_update():
     """
     Verifies that _attached_select_for_update behaves as expected on

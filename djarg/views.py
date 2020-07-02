@@ -91,11 +91,19 @@ class SingleObjectMixin(ViewMixin, edit_views.SingleObjectMixin):
     def get_default_args(self):
         return {**super().get_default_args(), 'object': self.object}
 
+    def get_queryset(self):
+        if isinstance(self.queryset, arg.Lazy):  # pragma: no cover
+            return arg.load(self.queryset, request=self.request)
+        else:
+            return super().get_queryset()
+
     def get(self, request, *args, **kwargs):
+        self.request = request
         self.object = self.get_object()
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        self.request = request
         self.object = self.get_object()
         return super().post(request, *args, **kwargs)
 
@@ -164,10 +172,12 @@ class MultipleObjectsMixin(ViewMixin, edit_views.ContextMixin):
         return {**super().get_default_args(), 'objects': self.objects}
 
     def get(self, request, *args, **kwargs):
+        self.request = request
         self.objects = self.get_objects()
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        self.request = request
         self.objects = self.get_objects()
         return super().post(request, *args, **kwargs)
 
