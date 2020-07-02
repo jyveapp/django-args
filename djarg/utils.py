@@ -112,9 +112,14 @@ class qset(arg.Lazy):
         if isinstance(objects, models.QuerySet):
             return self._attach_select_for_update(objects)
 
+        if isinstance(self._qset, arg.Lazy):
+            qset = arg.load(self._qset, **call_args)
+        else:
+            qset = self._qset
+
         # No object. Return empty queryset
         if objects is None:
-            return self._qset.none()
+            return qset.none()
 
         # Ensure we are always working with a list from now on
         if not isinstance(objects, (list, tuple)):
@@ -122,17 +127,17 @@ class qset(arg.Lazy):
 
         # Empty list. Return empty queryset
         if not objects:
-            return self._qset.none()
+            return qset.none()
 
         # Handle list of models or list of pks
         pk_in = f'{self._pk}__in'
         if isinstance(objects[0], models.Model):
             return self._attach_select_for_update(
-                self._qset.filter(
+                qset.filter(
                     **{pk_in: [getattr(obj, self._pk) for obj in objects]}
                 )
             )
         else:
             return self._attach_select_for_update(
-                self._qset.filter(**{pk_in: objects})
+                qset.filter(**{pk_in: objects})
             )
