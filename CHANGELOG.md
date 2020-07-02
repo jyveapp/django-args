@@ -1,4 +1,11 @@
 # Changelog
+## 1.2.0 (2020-07-02)
+### Feature
+  - Allow ``.qset`` utility to lazy load querysets. [Wes Kendall, fa64670]
+
+    The ``qset`` argument for bootstrapping the ``djarg.qset`` utility can
+    now lazy load the querysets based on bound args.
+
 ## 1.1.0 (2020-06-29)
 ### Feature
   - Add a ``select_for_update`` option to ``djarg.qset`` [Wes Kendall, ab18034]

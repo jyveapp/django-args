@@ -12,7 +12,7 @@ name = "django-args"
 packages = [
   { include = "djarg" }
 ]
-version = "1.1.0"
+version = "1.2.0"
 description = "Django wrappers for python-args functions."
 authors = ["Wes Kendall"]
 classifiers = [
