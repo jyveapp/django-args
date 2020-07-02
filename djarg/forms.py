@@ -57,7 +57,7 @@ def get_form_clean(func, form, default_args=None):
     return clean
 
 
-def adapt(form, func, default_args=None):
+def adapt(form, func, default_args=None, clean=True):
     """
     Adapt a form to an python-args func, ensuring the form validation behaves
     seamlessly with function validation.
@@ -69,6 +69,8 @@ def adapt(form, func, default_args=None):
         func (function): A function decorated with ``python-args`` decorators.
         default_args (dict, default=None): A dictionary of any other default
             arguments that are used when calling the ``python-args`` function.
+        clean (bool, default=True): Adapt the clean method to the validators
+            of the func
     """
     default_args = default_args or {}
 
@@ -79,12 +81,13 @@ def adapt(form, func, default_args=None):
                 field, **{**{'form': form}, **default_args}
             )
 
-    # Attached additional form field validators
-    for label, field in form.fields.items():
-        field.validators.append(get_field_validator(func, label))
+    if clean:  # pragma: no branch
+        # Attached additional form field validators
+        for label, field in form.fields.items():
+            field.validators.append(get_field_validator(func, label))
 
-    # Attach additional form clean methods
-    form.clean = get_form_clean(func, form, default_args=default_args)
+        # Attach additional form clean methods
+        form.clean = get_form_clean(func, form, default_args=default_args)
 
     return form
 
