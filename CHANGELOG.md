@@ -1,4 +1,11 @@
 # Changelog
+## 1.3.0 (2020-07-02)
+### Feature
+  - Add ``clean`` argument to turn off binding clean method in djarg.forms.adapt [Wes Kendall, 199ce5b]
+
+    When adapting a form to a python-args function, one can disable adapting the
+    clean method.
+
 ## 1.2.0 (2020-07-02)
 ### Feature
   - Allow ``.qset`` utility to lazy load querysets. [Wes Kendall, fa64670]
