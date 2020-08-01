@@ -147,6 +147,36 @@ def test_grant_staff_object_view(client):
 
 
 @pytest.mark.django_db
+def test_grant_staff_if_same_name_object_view(client):
+    seinfeld = ddf.G(User, first_name='Seinfeld')
+    newman = ddf.G(User, first_name='Newman')
+    granter = ddf.G(
+        User, is_staff=True, is_superuser=True, first_name='Newman'
+    )
+    client.force_login(granter)
+
+    # Test same name
+    url = urls.reverse(
+        'grant_staff_access_if_same_name_object', kwargs={'pk': newman.id}
+    )
+    assert not newman.is_staff
+    resp = client.post(url, data={'is_staff': True, 'source': 'good'})
+    assert resp.status_code == 302
+    newman.refresh_from_db()
+    assert newman.is_staff
+
+    # Test mismatch name
+    url = urls.reverse(
+        'grant_staff_access_if_same_name_object', kwargs={'pk': seinfeld.id}
+    )
+    assert not seinfeld.is_staff
+    resp = client.post(url, data={'is_staff': True, 'source': 'good'})
+    assert resp.status_code == 404
+    seinfeld.refresh_from_db()
+    assert not seinfeld.is_staff
+
+
+@pytest.mark.django_db
 def test_grant_staff_objects_view(client):
     users = ddf.G(User, n=2, is_staff=True)
     granter = ddf.G(User, is_staff=True, is_superuser=True, username='GRANT')
@@ -204,6 +234,37 @@ def test_grant_staff_objects_view(client):
     content = resp.content.decode()
     assert 'bad_user1: Bad username' in content
     assert 'bad_user2: Bad username' in content
+
+
+@pytest.mark.django_db
+def test_grant_staff_if_same_name_objects_view(client):
+    seinfelds = ddf.G(User, n=2, first_name='Seinfeld')
+    newmans = ddf.G(User, n=2, first_name='Newman')
+    granter = ddf.G(
+        User, is_staff=True, is_superuser=True, first_name='Newman'
+    )
+    client.force_login(granter)
+
+    # Test a "GET" when one PK is in queryset, and the other is not
+    url = urls.reverse('grant_staff_access_if_same_name_objects')
+    url += f'?pk={seinfelds[0].id}&pk={newmans[0].id}'
+    resp = client.get(url)
+    assert resp.status_code == 404
+
+    # And now, when both PKs are in the queryset
+    url = urls.reverse('grant_staff_access_if_same_name_objects')
+    url += f'?pk={newmans[0].id}&pk={newmans[1].id}'
+    resp = client.get(url)
+    assert resp.status_code == 200
+
+    # Test a valid post
+    for newman in newmans:
+        newman.refresh_from_db()
+        assert not newman.is_staff
+    resp = client.post(url, data={'is_staff': True, 'source': 'good'})
+    for newman in newmans:
+        newman.refresh_from_db()
+        assert newman.is_staff
 
 
 @pytest.mark.django_db

@@ -92,7 +92,14 @@ class SingleObjectMixin(ViewMixin, edit_views.SingleObjectMixin):
         return {**super().get_default_args(), 'object': self.object}
 
     def get_queryset(self):
-        if isinstance(self.queryset, arg.Lazy):  # pragma: no cover
+        """
+        Returns the queryset for single-object views. If the queryset as been
+        overridden to be a "lazy" function (e.g. from ``python-args``), the
+        function will be evaluated with ``request`` as a keyword argument and
+        returned. Otherwise, it defaults to Django's generic detail-view
+        ``get_queryset()`` function.
+        """
+        if isinstance(self.queryset, arg.Lazy):
             return arg.load(self.queryset, request=self.request)
         else:
             return super().get_queryset()
@@ -148,11 +155,18 @@ class MultipleObjectsMixin(ViewMixin, edit_views.ContextMixin):
 
         return objects
 
-    #: Get Queryset
-    get_queryset = edit_views.SingleObjectMixin.get_queryset
-    get_queryset.__doc__ = """
-        Uses Django's SingleObjectMixin get_queryset implementation.
-    """
+    def get_queryset(self):
+        """
+        Returns the queryset for multi-object views. If the queryset as been
+        overridden to be a "lazy" function (e.g. from ``python-args``), the
+        function will be evaluated with ``request`` as a keyword argument and
+        returned. Otherwise, it defaults to Django's generic detail-view
+        ``get_queryset()`` function.
+        """
+        if isinstance(self.queryset, arg.Lazy):
+            return arg.load(self.queryset, request=self.request)
+        else:
+            return edit_views.SingleObjectMixin.get_queryset(self)
 
     def get_context_objects_name(self, objects):
         """Get the name to use for the object."""

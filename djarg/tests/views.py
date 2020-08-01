@@ -95,6 +95,12 @@ class GrantStaffObjectView(
     success_url = '.'
 
 
+class GrantStaffIfSameNameObjectView(GrantStaffObjectView):
+    queryset = arg.func(
+        lambda request: User.objects.filter(first_name=request.user.first_name)
+    )
+
+
 ###
 # ObjectsFormView test setup
 ###
@@ -137,6 +143,12 @@ class GrantStaffObjectsView(
 
     def get_default_args(self):
         return {**super().get_default_args(), **{'granter': self.request.user}}
+
+
+class GrantStaffIfSameNameObjectsView(GrantStaffObjectsView):
+    queryset = arg.func(
+        lambda request: User.objects.filter(first_name=request.user.first_name)
+    )
 
 
 ###

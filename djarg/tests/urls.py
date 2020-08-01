@@ -22,9 +22,19 @@ urlpatterns = [
         name='grant_staff_access_object',
     ),
     path(
+        'grant-staff-access-if-same-name-object/<int:pk>/',
+        views.GrantStaffIfSameNameObjectView.as_view(),
+        name='grant_staff_access_if_same_name_object',
+    ),
+    path(
         'grant-staff-access-objects/',
         views.GrantStaffObjectsView.as_view(),
         name='grant_staff_access_objects',
+    ),
+    path(
+        'grant-staff-access-if-same-name-objects/',
+        views.GrantStaffIfSameNameObjectsView.as_view(),
+        name='grant_staff_access_if_same_name_objects',
     ),
     path(
         'grant-staff-access-wizard/',
