@@ -1,4 +1,12 @@
 # Changelog
+## 1.4.0 (2020-08-01)
+### Bug
+  - Support `arg.func` wrapped queryset function in multi-object actions [Tómas Árni Jónasson, c84ffb9]
+
+    One can declare `queryset` attribute on actions with a custom function, wrapped with `arg.func` from the `python-args` library. This works fine for single-object actions, as the `get_queryset()` method is overriden to support loading of those "lazy" functions.
+
+    This breaks if the action is used for multiple objects, as the queryset is handed over to Django for iteration, but it is not iterable, but a `arg.func` object.
+
 ## 1.3.0 (2020-07-02)
 ### Feature
   - Add ``clean`` argument to turn off binding clean method in djarg.forms.adapt [Wes Kendall, 199ce5b]
