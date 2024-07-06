@@ -243,41 +243,53 @@ class WizardView(ViewMixin, wizard_views.WizardView):
 
     def get_form_list(self, until=None):
         """
-        Overrides get_form_list() to dynamically evaluate arg.func()
-        conditions. Allows conditional evaluation up to a specific step
-        so that we avoid various infinite recursion issues.
+        This method returns a form_list based on the initial form list but
+        checks if there is a condition method/value in the condition_list.
+        If an entry exists in the condition list, it will call/read the value
+        and respect the result. (True means add the form, False means ignore
+        the form)
+
+        The form_list is always generated on the fly because condition methods
+        could use data from other (maybe previous forms).
         """
         form_list = collections.OrderedDict()
-        self._condition_cache = getattr(self, '_condition_cache', {})
+        if getattr(self, '_check_cond_started', False):
+            # Guard against infinite recursion, in the case a get_form_list is
+            # called in the context of a condition() call.
+            for step, form_class in self.form_list.items():
+                if step == until:
+                    break
+                form_list[step] = form_class
+            return form_list
+
+        self._check_cond_started = True
 
         for step, form_class in self.form_list.items():
             if step == until:
                 break
 
-            if step not in self._condition_cache:
-                condition = self.condition_dict.get(step, True)
-                if callable(condition):
-                    if isinstance(condition, arg.func):
-                        # Evaluate the cleaned data so far. If None, it means
-                        # a previous step didn't validate and we should include
-                        # the form as a step until we have enough data to
-                        # invalidate it
-                        args_so_far = self.get_cleaned_data(*form_list)
-                        if args_so_far is not None:
-                            condition = arg.load(
-                                condition,
-                                **{**self.get_default_args(), **args_so_far},
-                            )
-                        else:
-                            condition = True
+            condition = self.condition_dict.get(step, True)
+            if callable(condition):
+                if isinstance(condition, arg.func):
+                    # Evaluate the cleaned data so far. If None, it means
+                    # a previous step didn't validate and we should include
+                    # the form as a step until we have enough data to
+                    # invalidate it
+                    args_so_far = self.get_cleaned_data(*form_list)
+                    if args_so_far is not None:
+                        condition = arg.load(
+                            condition,
+                            **{**self.get_default_args(), **args_so_far},
+                        )
                     else:
-                        condition = condition(self)
+                        condition = True
+                else:
+                    condition = condition(self)
 
-                self._condition_cache[step] = condition
-
-            if self._condition_cache[step]:
+            if condition:
                 form_list[step] = form_class
 
+        del self._check_cond_started
         return form_list
 
     def get_form(self, step=None, **kwargs):
@@ -287,38 +299,17 @@ class WizardView(ViewMixin, wizard_views.WizardView):
             step = self.steps.current
 
         steps_so_far = self.get_form_list(until=step)
-        args_so_far = self.get_cleaned_data(*steps_so_far) or {}
+        if getattr(self, '_check_get_cleaned_data', False):
+            # Guard against infinite recursion, in the case a get_form_list is
+            # called in the context of a get_cleaned_data() in condition() call.
+            args_so_far = self.get_cleaned_data(*steps_so_far) or {}
+            self._check_get_cleaned_data = True
+            del self._check_get_cleaned_data
+        else:
+            args_so_far = {}
         return djarg.forms.adapt(
             form, self.func, {**self.get_default_args(), **args_so_far}
         )
-
-    def get_cleaned_data_for_step(self, step):
-        """Get cleaned data for a specific step."""
-        self._cleaned_step_data_cache = getattr(
-            self, '_cleaned_step_data_cache', {}
-        )
-        if step not in self._cleaned_step_data_cache:
-            self._cleaned_step_data_cache[
-                step
-            ] = super().get_cleaned_data_for_step(step)
-
-        return self._cleaned_step_data_cache[step]
-
-    def get_cleaned_data(self, *steps):
-        """
-        Gets cleaned data for all steps in order given.
-
-        If any steps don't validate, return None
-        """
-        cleaned_data = {}
-        for step in steps:
-            cleaned_step_data = self.get_cleaned_data_for_step(step)
-            if cleaned_step_data is None:
-                return None
-
-            cleaned_data.update(cleaned_step_data)
-
-        return cleaned_data
 
     def run_func(self):
         """
